@@ -32,6 +32,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//Draw the map
 	level.DrawLevel(screen)
 	ProcessRenderables(g, level, screen)
+	processPlayerMovement(g, level)
 }
 
 func (g *Game) Layout(w, h int) (int, int) {

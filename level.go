@@ -50,7 +50,7 @@ func (level *Level) CreateTiles() []MapTile {
 				if err != nil {
 					log.Fatal(err)
 				}
-				tile := MapTile{PixelX: x * gd.TileWidth, PixelY: y * gd.TileHeight, Blocked: true, Image: floor}
+				tile := MapTile{PixelX: x * gd.TileWidth, PixelY: y * gd.TileHeight, Blocked: false, Image: floor}
 				tiles[index] = tile
 			}
 		}
