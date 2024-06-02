@@ -7,11 +7,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-type GameData struct {
-	ScreenWidth  int
-	ScreenHeight int
-	TileWidth    int
-	TileHeight   int
+type Level struct {
+	Tiles []MapTile
+}
+
+func NewLevel() Level {
+	l := Level{}
+	tiles := l.CreateTiles()
+	l.Tiles = tiles
+	return l
 }
 
 type MapTile struct {
@@ -21,28 +25,18 @@ type MapTile struct {
 	Image   *ebiten.Image
 }
 
-func NewGameData() GameData {
-	g := GameData{
-		ScreenWidth:  80,
-		ScreenHeight: 50,
-		TileWidth:    16,
-		TileHeight:   16,
-	}
-	return g
-}
-
-func GetIndexFromXY(x, y int) int {
+func (level *Level) GetIndexFromXY(x, y int) int {
 	gd := NewGameData()
 	return (y * gd.ScreenWidth) + x
 }
 
-func CreateTiles() []MapTile {
+func (level *Level) CreateTiles() []MapTile {
 	gd := NewGameData()
 	tiles := make([]MapTile, gd.ScreenWidth*gd.ScreenHeight)
 
 	for x := 0; x < gd.ScreenWidth; x++ {
 		for y := 0; y < gd.ScreenHeight; y++ {
-			index := GetIndexFromXY(x, y)
+			index := level.GetIndexFromXY(x, y)
 
 			if x == 0 || x == gd.ScreenWidth-1 || y == 0 || y == gd.ScreenHeight-1 {
 				wall, _, err := ebitenutil.NewImageFromFile("assets/wall.png")
