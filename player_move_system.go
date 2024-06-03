@@ -2,7 +2,7 @@ package main
 
 import "github.com/hajimehoshi/ebiten/v2"
 
-func processPlayerMovement(g *Game, level Level) {
+func TryMovePlayer(g *Game, level Level) {
 	//get direction delta
 	delta := Position{0, 0}
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
@@ -22,6 +22,9 @@ func processPlayerMovement(g *Game, level Level) {
 
 		newPos := Position{X: pos.X + delta.X, Y: pos.Y + delta.Y}
 		index := level.GetIndexFromXY(newPos.X, newPos.Y)
+		if *pos == newPos {
+			return
+		}
 		//check if out of bound
 		if index < 0 || index > len(level.Tiles)-1 {
 			return
@@ -29,6 +32,8 @@ func processPlayerMovement(g *Game, level Level) {
 		//check if tile is blocked
 		if !level.Tiles[index].Blocked {
 			*pos = newPos
+			g.Turn = GetNextState(g.Turn)
+			g.TurnCounter = 0
 		}
 	}
 }

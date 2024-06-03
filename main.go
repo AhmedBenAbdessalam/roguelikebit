@@ -9,9 +9,11 @@ import (
 )
 
 type Game struct {
-	Map       GameMap
-	World     *ecs.Manager
-	WorldTags map[string]ecs.Tag
+	Map         GameMap
+	World       *ecs.Manager
+	WorldTags   map[string]ecs.Tag
+	Turn        TurnState
+	TurnCounter int
 }
 
 func NewGame() *Game {
@@ -20,10 +22,17 @@ func NewGame() *Game {
 	world, tags := InitializeWorld(g.Map.CurrentLevel)
 	g.World = world
 	g.WorldTags = tags
+	g.Turn = PlayerTurn
+	g.TurnCounter = 0
 	return g
 }
 
 func (g *Game) Update() error {
+	g.TurnCounter++
+	if g.Turn == PlayerTurn && g.TurnCounter > 7 {
+		TryMovePlayer(g, g.Map.CurrentLevel)
+	}
+	g.Turn = PlayerTurn
 	return nil
 }
 
@@ -32,7 +41,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	//Draw the map
 	level.DrawLevel(screen)
 	ProcessRenderables(g, level, screen)
-	processPlayerMovement(g, level)
 }
 
 func (g *Game) Layout(w, h int) (int, int) {
