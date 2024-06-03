@@ -30,7 +30,7 @@ func NewGame() *Game {
 func (g *Game) Update() error {
 	g.TurnCounter++
 	if g.Turn == PlayerTurn && g.TurnCounter > 7 {
-		TryMovePlayer(g, g.Map.CurrentLevel)
+		TryMovePlayer(g)
 	}
 	g.Turn = PlayerTurn
 	return nil
