@@ -4,12 +4,15 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/norendren/go-fov/fov"
 )
 
 type Level struct {
-	Tiles []MapTile
-	Rooms []Rect
+	Tiles         []MapTile
+	Rooms         []Rect
+	PlayerVisible *fov.View
 }
 
 func NewLevel() Level {
@@ -17,14 +20,16 @@ func NewLevel() Level {
 	rooms := make([]Rect, 0)
 	l.Rooms = rooms
 	l.GenerateLevelTiles()
+	l.PlayerVisible = fov.New()
 	return l
 }
 
 type MapTile struct {
-	PixelX  int
-	PixelY  int
-	Blocked bool
-	Image   *ebiten.Image
+	PixelX     int
+	PixelY     int
+	Blocked    bool
+	Image      *ebiten.Image
+	IsRevealed bool
 }
 
 func (level *Level) GetIndexFromXY(x, y int) int {
@@ -43,7 +48,13 @@ func (level *Level) CreateTiles() []MapTile {
 			if err != nil {
 				log.Fatal(err)
 			}
-			tile := MapTile{PixelX: x * gd.TileWidth, PixelY: y * gd.TileHeight, Blocked: true, Image: wall}
+			tile := MapTile{
+				PixelX:     x * gd.TileWidth,
+				PixelY:     y * gd.TileHeight,
+				Blocked:    true,
+				Image:      wall,
+				IsRevealed: false,
+			}
 			tiles[index] = tile
 		}
 	}
@@ -54,10 +65,20 @@ func (level *Level) DrawLevel(screen *ebiten.Image) {
 	gd := NewGameData()
 	for x := 0; x < gd.ScreenWidth; x++ {
 		for y := 0; y < gd.ScreenHeight; y++ {
+			isVisible := level.PlayerVisible.IsVisible(x, y)
 			tile := level.Tiles[level.GetIndexFromXY(x, y)]
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Translate(float64(tile.PixelX), float64(tile.PixelY))
-			screen.DrawImage(tile.Image, op)
+			if isVisible {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Translate(float64(tile.PixelX), float64(tile.PixelY))
+				screen.DrawImage(tile.Image, op)
+				level.Tiles[level.GetIndexFromXY(x, y)].IsRevealed = true
+			} else if tile.IsRevealed {
+				op := &colorm.DrawImageOptions{}
+				op.GeoM.Translate(float64(tile.PixelX), float64(tile.PixelY))
+				var cm colorm.ColorM
+				cm.Scale(1, 1, 1, .5)
+				colorm.DrawImage(screen, tile.Image, cm, op)
+			}
 		}
 	}
 }
@@ -149,4 +170,18 @@ func (level *Level) createVerticalTunnel(y1, y2, x int) {
 			level.Tiles[index].Image = floor
 		}
 	}
+}
+
+func (level Level) InBounds(x, y int) bool {
+	gd := NewGameData()
+	if x < 0 || x > gd.ScreenWidth || y < 0 || y > gd.ScreenHeight {
+		return false
+	}
+	return true
+}
+
+// TODO: Change this to check for WALL, not blocked
+func (level Level) IsOpaque(x, y int) bool {
+	idx := level.GetIndexFromXY(x, y)
+	return level.Tiles[idx].Blocked
 }

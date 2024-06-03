@@ -34,6 +34,7 @@ func TryMovePlayer(g *Game, level Level) {
 			*pos = newPos
 			g.Turn = GetNextState(g.Turn)
 			g.TurnCounter = 0
+			level.PlayerVisible.Compute(level, pos.X, pos.Y, 8)
 		}
 	}
 }
