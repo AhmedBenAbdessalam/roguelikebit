@@ -66,14 +66,14 @@ func InitializeWorld(startingLevel Level) (*ecs.Manager, map[string]ecs.Tag) {
 		}).
 		AddComponent(meleeWeapon, &MeleeWeapon{
 			Name:          "Battle Axe",
-			MinimumDamage: 10,
-			MaximumDamage: 20,
+			MinimumDamage: 5,
+			MaximumDamage: 15,
 			ToHitBonus:    3,
 		}).
 		AddComponent(armor, &Armor{
 			Name:       "Plat Armor",
-			Defense:    15,
-			ArmorClass: 18,
+			Defense:    8,
+			ArmorClass: 6,
 		}).
 		AddComponent(name, &Name{
 			Label: "Player",
@@ -107,8 +107,8 @@ func InitializeWorld(startingLevel Level) (*ecs.Manager, map[string]ecs.Tag) {
 					}).
 					AddComponent(meleeWeapon, &MeleeWeapon{
 						Name:          "Machete",
-						MinimumDamage: 4,
-						MaximumDamage: 8,
+						MinimumDamage: 8,
+						MaximumDamage: 16,
 						ToHitBonus:    1,
 					}).
 					AddComponent(armor, &Armor{
@@ -142,9 +142,9 @@ func InitializeWorld(startingLevel Level) (*ecs.Manager, map[string]ecs.Tag) {
 					}).
 					AddComponent(meleeWeapon, &MeleeWeapon{
 						Name:          "Short Sword",
-						MinimumDamage: 2,
-						MaximumDamage: 6,
-						ToHitBonus:    0,
+						MinimumDamage: 6,
+						MaximumDamage: 10,
+						ToHitBonus:    9,
 					}).
 					AddComponent(armor, &Armor{
 						Name:       "Bone",
