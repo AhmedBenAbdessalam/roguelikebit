@@ -9,6 +9,8 @@ import (
 	"github.com/norendren/go-fov/fov"
 )
 
+var levelHeight int = 0
+
 type TileType int
 
 const (
@@ -67,10 +69,11 @@ func (level *Level) GetIndexFromXY(x, y int) int {
 
 func (level *Level) CreateTiles() []*MapTile {
 	gd := NewGameData()
-	tiles := make([]*MapTile, gd.ScreenWidth*gd.ScreenHeight)
+	levelHeight = gd.ScreenHeight - gd.UIHeight
+	tiles := make([]*MapTile, gd.ScreenWidth*levelHeight)
 
 	for x := 0; x < gd.ScreenWidth; x++ {
-		for y := 0; y < gd.ScreenHeight; y++ {
+		for y := 0; y < levelHeight; y++ {
 			index := level.GetIndexFromXY(x, y)
 			tile := MapTile{
 				PixelX:     x * gd.TileWidth,
@@ -89,7 +92,7 @@ func (level *Level) CreateTiles() []*MapTile {
 func (level *Level) DrawLevel(screen *ebiten.Image) {
 	gd := NewGameData()
 	for x := 0; x < gd.ScreenWidth; x++ {
-		for y := 0; y < gd.ScreenHeight; y++ {
+		for y := 0; y < levelHeight; y++ {
 			isVisible := level.PlayerVisible.IsVisible(x, y)
 			tile := level.Tiles[level.GetIndexFromXY(x, y)]
 			if isVisible {
@@ -133,7 +136,7 @@ func (level *Level) GenerateLevelTiles() {
 		w := GetRandomBetween(MIN_SIZE, MAX_SIZE)
 		h := GetRandomBetween(MIN_SIZE, MAX_SIZE)
 		x := GetDiceRoll(gd.ScreenWidth - w - 2)
-		y := GetDiceRoll(gd.ScreenHeight - h - 2)
+		y := GetDiceRoll(levelHeight - h - 2)
 
 		new_room := NewRect(x, y, w, h)
 		okToAdd := true
@@ -168,7 +171,7 @@ func (level *Level) createHorizontalTunnel(x1, x2, y int) {
 	gd := NewGameData()
 	for x := min(x1, x2); x < max(x1, x2)+1; x++ {
 		index := level.GetIndexFromXY(x, y)
-		if index > 0 && index < gd.ScreenWidth*gd.ScreenHeight {
+		if index > 0 && index < gd.ScreenWidth*levelHeight {
 			level.Tiles[index].Blocked = false
 			level.Tiles[index].Image = floor
 			level.Tiles[index].TileType = FLOOR
@@ -180,7 +183,7 @@ func (level *Level) createVerticalTunnel(y1, y2, x int) {
 	gd := NewGameData()
 	for y := min(y1, y2); y < max(y1, y2)+1; y++ {
 		index := level.GetIndexFromXY(x, y)
-		if index > 0 && index < gd.ScreenWidth*gd.ScreenHeight {
+		if index > 0 && index < gd.ScreenWidth*levelHeight {
 			level.Tiles[index].Blocked = false
 			level.Tiles[index].Image = floor
 			level.Tiles[index].TileType = FLOOR
@@ -190,7 +193,7 @@ func (level *Level) createVerticalTunnel(y1, y2, x int) {
 
 func (level Level) InBounds(x, y int) bool {
 	gd := NewGameData()
-	if x < 0 || x > gd.ScreenWidth || y < 0 || y > gd.ScreenHeight {
+	if x < 0 || x > gd.ScreenWidth || y < 0 || y > levelHeight {
 		return false
 	}
 	return true
