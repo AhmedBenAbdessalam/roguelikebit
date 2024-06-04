@@ -2,7 +2,7 @@ package main
 
 import "github.com/hajimehoshi/ebiten/v2"
 
-func TryMovePlayer(g *Game) {
+func TakePlayerAction(g *Game) {
 	turnTaken := false
 	//get direction delta
 	x, y := 0, 0
@@ -33,6 +33,12 @@ func TryMovePlayer(g *Game) {
 			pos.Y += y
 			level.Tiles[index].Blocked = true
 			level.PlayerVisible.Compute(level, pos.X, pos.Y, 8)
+		} else if x != 0 || y != 0 {
+			if level.Tiles[index].TileType != WALL {
+				//Its a tile with a monster -- Fight it
+				monsterPosition := Position{X: pos.X + x, Y: pos.Y + y}
+				AttackSystem(g, pos, &monsterPosition)
+			}
 		}
 		if x != 0 || y != 0 || turnTaken {
 			g.Turn = GetNextState(g.Turn)
