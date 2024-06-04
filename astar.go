@@ -157,5 +157,30 @@ func (as AStar) GetPath(level Level, start *Position, end *Position) []Position 
 				edges = append(edges, newNode)
 			}
 		}
+		//Now iterate through the edges and put them in the open list
+		for _, edge := range edges {
+			if isInSlice(closedList, edge) {
+				continue
+			}
+			edge.g = currentNode.g + 1
+			edge.h = edge.Position.GetManhattanDistance(endNodePlaceholder.Position)
+			edge.f = edge.g + edge.h
+
+			if isInSlice(openList, edge) {
+				isFurther := false
+				for _, n := range openList {
+					if edge.g > n.g {
+						isFurther = true
+						break
+					}
+				}
+				if isFurther {
+					continue
+				}
+
+			}
+			openList = append(openList, edge)
+		}
 	}
+	return nil
 }

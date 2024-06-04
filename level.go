@@ -16,14 +16,34 @@ const (
 	FLOOR
 )
 
+var floor *ebiten.Image
+var wall *ebiten.Image
+
+func loadTileImages() {
+	if floor != nil && wall != nil {
+		return
+	}
+	var err error
+	floor, _, err = ebitenutil.NewImageFromFile("assets/floor.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	wall, _, err = ebitenutil.NewImageFromFile("assets/wall.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 type Level struct {
-	Tiles         []MapTile
+	Tiles         []*MapTile
 	Rooms         []Rect
 	PlayerVisible *fov.View
 }
 
 func NewLevel() Level {
 	l := Level{}
+	loadTileImages()
 	rooms := make([]Rect, 0)
 	l.Rooms = rooms
 	l.GenerateLevelTiles()
@@ -45,17 +65,13 @@ func (level *Level) GetIndexFromXY(x, y int) int {
 	return (y * gd.ScreenWidth) + x
 }
 
-func (level *Level) CreateTiles() []MapTile {
+func (level *Level) CreateTiles() []*MapTile {
 	gd := NewGameData()
-	tiles := make([]MapTile, gd.ScreenWidth*gd.ScreenHeight)
+	tiles := make([]*MapTile, gd.ScreenWidth*gd.ScreenHeight)
 
 	for x := 0; x < gd.ScreenWidth; x++ {
 		for y := 0; y < gd.ScreenHeight; y++ {
 			index := level.GetIndexFromXY(x, y)
-			wall, _, err := ebitenutil.NewImageFromFile("assets/wall.png")
-			if err != nil {
-				log.Fatal(err)
-			}
 			tile := MapTile{
 				PixelX:     x * gd.TileWidth,
 				PixelY:     y * gd.TileHeight,
@@ -64,7 +80,7 @@ func (level *Level) CreateTiles() []MapTile {
 				IsRevealed: false,
 				TileType:   WALL,
 			}
-			tiles[index] = tile
+			tiles[index] = &tile
 		}
 	}
 	return tiles
@@ -93,10 +109,6 @@ func (level *Level) DrawLevel(screen *ebiten.Image) {
 }
 
 func (level *Level) createRoom(room Rect) {
-	floor, _, err := ebitenutil.NewImageFromFile("assets/floor.png")
-	if err != nil {
-		log.Fatal(err)
-	}
 	for y := room.Y1; y < room.Y2+1; y++ {
 		for x := room.X1; x < room.X2+1; x++ {
 			index := level.GetIndexFromXY(x, y)
@@ -154,10 +166,6 @@ func (level *Level) GenerateLevelTiles() {
 
 func (level *Level) createHorizontalTunnel(x1, x2, y int) {
 	gd := NewGameData()
-	floor, _, err := ebitenutil.NewImageFromFile("assets/floor.png")
-	if err != nil {
-		log.Fatal(err)
-	}
 	for x := min(x1, x2); x < max(x1, x2)+1; x++ {
 		index := level.GetIndexFromXY(x, y)
 		if index > 0 && index < gd.ScreenWidth*gd.ScreenHeight {
@@ -170,10 +178,6 @@ func (level *Level) createHorizontalTunnel(x1, x2, y int) {
 
 func (level *Level) createVerticalTunnel(y1, y2, x int) {
 	gd := NewGameData()
-	floor, _, err := ebitenutil.NewImageFromFile("assets/floor.png")
-	if err != nil {
-		log.Fatal(err)
-	}
 	for y := min(y1, y2); y < max(y1, y2)+1; y++ {
 		index := level.GetIndexFromXY(x, y)
 		if index > 0 && index < gd.ScreenWidth*gd.ScreenHeight {
